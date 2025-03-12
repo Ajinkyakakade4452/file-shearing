@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from "react";
 import Peer from "peerjs";
 import { CheckCircle } from "lucide-react";
@@ -23,8 +21,16 @@ const App = () => {
   };
 
   useEffect(() => {
-    const newPeer = new Peer();
-    newPeer.on("open", (id) => setPeerId(id));
+    const generatePeerId = () => Math.floor(1000 + Math.random() * 9000).toString(); // Generates a 4-digit ID
+
+    const newPeer = new Peer(generatePeerId(), {
+      debug: 2,
+    });
+
+    newPeer.on("open", (id) => {
+      console.log("Generated Peer ID:", id);
+      setPeerId(id);
+    });
 
     newPeer.on("connection", (newConn) => {
       if (connections.length >= 2) {
