@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import Peer from "peerjs";
 import { CheckCircle } from "lucide-react";
@@ -21,16 +22,15 @@ const App = () => {
   };
 
   useEffect(() => {
-    const generatePeerId = () => Math.floor(1000 + Math.random() * 9000).toString(); // Generates a 4-digit ID
-
-    const newPeer = new Peer(generatePeerId(), {
+    const generatePeerId = () => Math.floor(1000 + Math.random() * 9000).toString();
+    const newPeer = new Peer(generatePeerId(),{
       debug: 2,
     });
-
     newPeer.on("open", (id) => {
       console.log("Generated Peer ID:", id);
       setPeerId(id);
-    });
+
+    }); 
 
     newPeer.on("connection", (newConn) => {
       if (connections.length >= 2) {
@@ -109,6 +109,12 @@ const App = () => {
     };
   };
 
+  const disconnectAll = () => {
+    connections.forEach((conn) => conn.close());
+    setConnections([]);
+    openDialog("Disconnected from all peers.");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-800 via-black to-gray-900 text-white px-4 sm:px-8 md:px-12 py-8">
       <div className="w-full max-w-7xl flex flex-col md:flex-row items-center justify-center md:justify-between gap-12">
@@ -136,6 +142,7 @@ const App = () => {
             peerId={peerId}
             fileInputRef={fileInputRef}
             sendFile={sendFile}
+            onDisconnect={disconnectAll}
           />
 
           <SharingCard
@@ -144,6 +151,7 @@ const App = () => {
             buttonText="Join Connection"
             onClick={joinConnection}
             setConnectionId={setConnectionId}
+            onDisconnect={disconnectAll}
           />
         </div>
 
@@ -164,7 +172,6 @@ const App = () => {
   );
 };
 
-// ✅ Modal Dialog Component
 const ModalDialog = ({ message, onClose }) => (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
     <div className="bg-gray-800 text-white p-6 rounded-lg shadow-lg max-w-sm w-full">
@@ -179,7 +186,6 @@ const ModalDialog = ({ message, onClose }) => (
   </div>
 );
 
-// ✅ Feature Item Component
 const FeatureItem = ({ text }) => (
   <div className="flex items-center space-x-3">
     <CheckCircle className="text-blue-400" size={28} />
@@ -187,8 +193,7 @@ const FeatureItem = ({ text }) => (
   </div>
 );
 
-// ✅ Sharing Card Component
-const SharingCard = ({ title, description, buttonText, onClick, setConnectionId, fileInputRef, sendFile }) => (
+const SharingCard = ({ title, description, buttonText, onClick, setConnectionId, fileInputRef, sendFile, onDisconnect }) => (
   <div className="bg-white/10 backdrop-blur-lg text-white rounded-3xl shadow-2xl p-6 w-full max-w-xs border border-white/30 hover:scale-105 hover:border-blue-400 transition duration-300">
     <h3 className="text-lg font-semibold">{title}</h3>
     <p className="text-sm opacity-75">{description}</p>
@@ -196,6 +201,7 @@ const SharingCard = ({ title, description, buttonText, onClick, setConnectionId,
     {fileInputRef && <input type="file" ref={fileInputRef} className="mt-2 w-full text-sm" />}
     {fileInputRef && <button onClick={sendFile} className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg w-full">Send File</button>}
     <button onClick={onClick} className="mt-4 px-4 py-2 bg-gray-700 text-white rounded-lg w-full">{buttonText}</button>
+    <button onClick={onDisconnect} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg w-full">Disconnect</button>
   </div>
 );
 
